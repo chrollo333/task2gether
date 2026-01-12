@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { push, ref, set, onValue } from "firebase/database";
+import { push, ref, set, onValue, remove } from "firebase/database";
 import { db, auth } from "@/lib/firebase";
 import { useEffect } from "react";
 import type { Project } from "@/types";
+import { FiTrash2 } from "react-icons/fi";
+import { useSelectedBoardStore } from "@/store/selectedBoard";
 
 export default function Sidebar() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -12,6 +14,9 @@ export default function Sidebar() {
   const [user, setUser] = useState(auth.currentUser);
   const [isCreating, setIsCreating] = useState(false); //will be used for creating new projects
   const [newProjectTitle, setNewProjectTitle] = useState("");
+  const setSelectedBoard = useSelectedBoardStore((state) => state.setSelectedBoard);
+  const selectedBoardId = useSelectedBoardStore((state) => state.selectedBoardId);
+
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -65,16 +70,6 @@ export default function Sidebar() {
         userUid: user.uid,
         createdAt: Date.now(),
       });
-
-      setProjects((prev) => [
-        ...prev,
-        {
-          id: newProjectRef.key!,
-          name: title,
-          ownerUid: user.uid,
-          createdAt: Date.now(),
-        },
-      ]);
       console.log("Creating new project:", newProjectTitle);
     } catch (error) {
       console.error("Error creating project:", error);
@@ -83,6 +78,20 @@ export default function Sidebar() {
     setIsCreating(false);
   };
 
+
+
+  const handleDeleteProject = async (projectId: string) => {
+    if (!user) return;
+    if (!window.confirm("Delete this project board forever?")) return;
+    try {
+      const projectRef = ref(db, `projects/${projectId}`);
+      await remove(projectRef);
+      console.log("Deleted project with ID:", projectId);
+    }
+    catch (error) {
+      console.error("Error deleting project:", error);
+    }
+  }
   return (
     <aside className="w-64 bg-zinc-100 border-r border-zinc-200 flex flex-col">
       <div className="p-6 border-b border-zinc-200">
@@ -137,13 +146,29 @@ export default function Sidebar() {
             <p className="text-sm text-zinc-500">No boards yet. Create one!</p>
           ) : (
             projects.map((project) => (
-              <button
+              <div
                 key={project.id}
-                className="w-full text-left px-3 py-2 text-zinc-700 rounded hover:bg-zinc-200 transition"
-                //will add onClick={() => selectBoard(board.id)}   when firebase is integrated
+                className={`group flex items-center justify-between w-full text-left px-3 py-2 text-zinc-700 rounded hover:bg-zinc-200 transition ${
+                  selectedBoardId === project.id
+                  ? 'bg-zinc-300 text-zinc-900 font-medium'
+                  : 'text-zinc-700 hover:bg-zinc-200'
+                }`}
+                onClick={() => {
+                  console.log("Clicked board:", project.id, project.name);
+                  setSelectedBoard(project.id,project.name)}}
+                  
               >
                 {project.name}
-              </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteProject(project.id);
+                  }}
+                  className="text-xs text-zinc-500 hover:text-zinc-700"
+                >
+                  <FiTrash2 className="w-4 h-4" />
+                </button>
+              </div>
             ))
           )}
         </nav>
