@@ -6,8 +6,12 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
+import BoardContent from "@/components/BoardContent";
+
+
 export default function DashboardPage() {
   const router = useRouter();
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -23,16 +27,7 @@ return (
     <Sidebar />
      <div className="flex flex-1 flex-col">
       <Topbar />
-    <main className="flex-1 bg-gray-50 p-8 overflow-y-auto">  
-      <div className="flex flex-col items-center justify-center h-full">
-        <h1 className="text-4xl font-bold text-zinc-800 mb-4">
-          Welcome to your Dashboard!
-        </h1>
-        <p className="text-xl text-zinc-600">
-          Start by creating your first project.
-        </p>
-      </div>
-    </main>
+      <BoardContent />
   </div>
   </div>
 );

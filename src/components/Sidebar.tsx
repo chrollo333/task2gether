@@ -14,9 +14,12 @@ export default function Sidebar() {
   const [user, setUser] = useState(auth.currentUser);
   const [isCreating, setIsCreating] = useState(false); //will be used for creating new projects
   const [newProjectTitle, setNewProjectTitle] = useState("");
-  const setSelectedBoard = useSelectedBoardStore((state) => state.setSelectedBoard);
-  const selectedBoardId = useSelectedBoardStore((state) => state.selectedBoardId);
-
+  const setSelectedBoard = useSelectedBoardStore(
+    (state) => state.setSelectedBoard
+  );
+  const selectedBoardId = useSelectedBoardStore(
+    (state) => state.selectedBoardId
+  );
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -31,11 +34,9 @@ export default function Sidebar() {
       return;
     }
     const projectsRef = ref(db, "projects");
-    const unsubscribe = onValue((projectsRef), (snapshot) => {
+    const unsubscribe = onValue(projectsRef, (snapshot) => {
       const data = snapshot.val();
       const userProjects = [];
-
-
 
       if (!data) {
         setProjects([]);
@@ -78,8 +79,6 @@ export default function Sidebar() {
     setIsCreating(false);
   };
 
-
-
   const handleDeleteProject = async (projectId: string) => {
     if (!user) return;
     if (!window.confirm("Delete this project board forever?")) return;
@@ -87,11 +86,10 @@ export default function Sidebar() {
       const projectRef = ref(db, `projects/${projectId}`);
       await remove(projectRef);
       console.log("Deleted project with ID:", projectId);
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Error deleting project:", error);
     }
-  }
+  };
   return (
     <aside className="w-64 bg-zinc-100 border-r border-zinc-200 flex flex-col">
       <div className="p-6 border-b border-zinc-200">
@@ -140,7 +138,7 @@ export default function Sidebar() {
             </div>
           </form>
         )}
-
+        
         <nav className="space-y-1">
           {projects.length === 0 ? (
             <p className="text-sm text-zinc-500">No boards yet. Create one!</p>
@@ -150,13 +148,13 @@ export default function Sidebar() {
                 key={project.id}
                 className={`group flex items-center justify-between w-full text-left px-3 py-2 text-zinc-700 rounded hover:bg-zinc-200 transition ${
                   selectedBoardId === project.id
-                  ? 'bg-zinc-300 text-zinc-900 font-medium'
-                  : 'text-zinc-700 hover:bg-zinc-200'
+                    ? "bg-zinc-300 text-zinc-900 font-medium border-l-zinc-900 border-l-3"
+                    : "text-zinc-700 hover:bg-zinc-200"
                 }`}
                 onClick={() => {
                   console.log("Clicked board:", project.id, project.name);
-                  setSelectedBoard(project.id,project.name)}}
-                  
+                  setSelectedBoard(project.id, project.name);
+                }}
               >
                 {project.name}
                 <button
